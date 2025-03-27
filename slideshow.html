@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Islamic Prayer Times Slideshow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        body, .slide {
+            background: antiquewhite !important;
+        }
+
+        .nav {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .nav img {
+            height: 150px;
+            width: 150px;
+        }
+
+        .slideshow-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            xjustify-content: center;
+            align-items: center;
+            background: white;
+            text-align: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide h2 {
+            font-size: 3vw;
+            text-transform: capitalize;
+            color: darkblue;
+            margin-bottom: 30px;
+        }
+
+        .slide footer {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            font-size: 1rem;
+            font-style: italic;
+        }
+
+        .prayer-name {
+            color: gray;
+            font-size: 2rem;
+        }
+
+        .prayer-times {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2.0rem;
+            justify-content: center;
+        }
+
+        .prayer-time {
+            flex: 0 0 20%;
+            background: #f8f8f8;
+            padding: 1rem 1rem;
+            border-radius: 20%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+
+        .prayer-time-value {
+            font-size: 3rem;
+            margin-top: 20px;
+        }
+
+        .justify-content-start {
+            justify-content: start;
+        }
+
+        .align-items-start {
+            align-items: start;
+        }
+
+        .prayer-times {
+            margin-top: 50px;
+        }
+
+        .custom ul, .custom h3 {
+            margin-top: 20px;
+        }
+
+        .custom ul, .holidays, .custom h3  {
+            font-size: 1.5vw;
+        }
+
+        .holidays li, .custom ul li {
+            margin-bottom: 1.5vw;
+        }
+
+        .custom ul li {
+            margin: 0.5rem 0;
+            list-style: none;
+        }
+
+        .holidays li {
+            text-align: start;
+        }
+
+        .holidays .current {
+            color: green;
+        }
+
+        .holidays .li-key {
+            font-weight: 600;
+        }
+
+        .holidays .li-value {
+            font-style: italic
+        }
+
+        .nav-buttons {
+            position: absolute;
+            bottom: 2rem;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .slideshow-container:hover .nav-buttons {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button#autoSlideBtn {
+            background: #28a745;
+        }
+
+        button#autoSlideBtn:hover {
+            background: #218838;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #007bff;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            color: red;
+            padding: 1rem;
+            border: 1px solid red;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 1rem;
+            }
+
+            .prayer-times {
+                gap: 0.5rem;
+            }
+
+            .prayer-time {
+                padding: 0.5rem;
+            }
+        }
+
+        #clock-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: sans-serif;
+        }
+        #clock {
+            width: 500px;
+            height: 500px;
+            border: 25px solid #000;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #FFF;
+        }
+        #clock span {
+            position: absolute;
+            transform: rotate(calc(30deg * var(--i)));
+            inset: 32px;
+            text-align: center;
+        }
+        #clock span i {
+            transform: rotate(calc(-30deg * var(--j)));
+            display: inline-block;
+            font-size: 3.2rem;
+            font-style: normal;
+        }
+        #clock::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #000;
+            z-index: 2;
+            opacity: 0.6;
+        }
+        #clock .hand {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        #clock .hand i {
+            position: absolute;
+            background-color: var(--color);
+            width: var(--width);
+            height: var(--height);
+            border-radius: 8px;
+        }
+
+        .date i {
+            color: lightslategray;
+        }
+    </style>
+</head>
+<body>
+<template id="slide-template">
+    <div class="slide">
+        <div class="nav">
+            <img class="logo-left" src="mcc_logo.png">
+            <h2></h2>
+            <img class="logo-right" src="diyanet_logo.png">
+        </div>
+        <div class="loading"></div>
+        <div class="prayer-times"></div>
+        <ul class="holidays"></ul>
+        <footer></footer>
+    </div>
+</template>
+
+<template id="prayer-time-template">
+    <div class="prayer-time">
+        <p class="prayer-name"></p>
+        <h3 class="prayer-time-value"></h3>
+    </div>
+</template>
+
+<template id="holidays-item-template">
+    <li>
+        <span class="li-key"></span>: <span class="li-value"></span>
+    </li>
+</template>
+
+<template id="error-template">
+    <div class="error">
+        <p class="error-message"></p>
+    </div>
+</template>
+
+<div class="slideshow-container">
+    <div class="slides">
+        <div class="slide custom">
+            <div class="nav">
+                <img class="logo-left" src="mcc_logo.png">
+                <h2>Regels binnen <br/>de moskee</h2>
+                <img class="logo-right" src="diyanet_logo.png">
+            </div>
+            <ul>
+                <li>Masjid met sokken betreden</li>
+                <li>Niet eten/drinken in de masjid</li>
+                <li>Toiletten & wasruimte schoonhouden na gebruik</li>
+                <li>Let op uw taalgebruik & geen luid gepraat</li>
+                <li>Niet met uw voertuigen voor de deur of langs de weg parkeren/stilstaan, maar op de parkeerplaatsen</li>
+            </ul>
+            <footer></footer>
+        </div>
+        <div class="slide custom">
+            <div class="nav">
+                <img class="logo-left" src="mcc_logo.png">
+                <h2>CAMİ İÇİNDE VE ÇEVRESİNDE UYULMASI GEREKEN KURALLAR</h2>
+                <img class="logo-right" src="diyanet_logo.png">
+            </div>
+            <h3>Genel Kurallar:</h3>
+            <ul>
+                <li>Sessiz olun, yüksek sesle konuşmayın</li>
+                <li>Telefonları sessize alın</li>
+                <li>Temiz ve uygun giyinin</li>
+                <li>Eşyalara ve kitaplara saygılı olun</li>
+                <li>Çevreyi temiz tutun</li>
+            </ul>
+            <footer></footer>
+        </div>
+        <div class="slide custom">
+            <div class="nav">
+                <img class="logo-left" src="mcc_logo.png">
+                <h2>CAMİ İÇİNDE VE ÇEVRESİNDE UYULMASI GEREKEN KURALLAR</h2>
+                <img class="logo-right" src="diyanet_logo.png">
+            </div>
+            <h3>Mescid İçin:</h3>
+            <ul>
+                <li>Abdestli olun</li>
+                <li>Namaz kılanları rahatsız etmeyin</li>
+                <li>Seccade ve halıları temiz tutun</li>
+                <li>Çocukları kontrol edin</li>
+            </ul>
+            <footer></footer>
+        </div>
+        <div class="slide custom">
+            <div class="nav">
+                <img class="logo-left" src="mcc_logo.png">
+                <h2>CAMİ İÇİNDE VE ÇEVRESİNDE UYULMASI GEREKEN KURALLAR</h2>
+                <img class="logo-right" src="diyanet_logo.png">
+            </div>
+            <h3>Derslik ve Konferans Salonu İçin:</h3>
+            <ul>
+                <li>Dersi veya konuşmayı bölmeyin</li>
+                <li>Zamanında gelip, zamanında ayrılın</li>
+                <li>Sandalyeleri ve masaları düzenli bırakın</li>
+            </ul>
+            <footer></footer>
+        </div>
+        <div class="slide custom">
+            <div class="nav">
+                <img class="logo-left" src="mcc_logo.png">
+                <h2>CAMİ İÇİNDE VE ÇEVRESİNDE UYULMASI GEREKEN KURALLAR</h2>
+                <img class="logo-right" src="diyanet_logo.png">
+            </div>
+            <h3>Çay Ocağı ve Sosyal Alanlar İçin:</h3>
+            <ul>
+                <li>Temiz ve düzenli kullanın</li>
+                <li>İsraf etmeyin, ortak alanları paylaşımcı olun</li>
+                <li>Yüksek sesle konuşmaktan kaçının</li>
+            </ul>
+            <footer></footer>
+        </div>
+        <div class="slide custom">
+            <div class="nav">
+                <img class="logo-left" src="mcc_logo.png">
+                <h2>CAMİ İÇİNDE VE ÇEVRESİNDE UYULMASI GEREKEN KURALLAR</h2>
+                <img class="logo-right" src="diyanet_logo.png">
+            </div>
+            <h3>Cami Çevresinde:</h3>
+            <ul>
+                <li>Otopark kurallarına uyun</li>
+                <li>Komşulara saygılı olun</li>
+                <li>Giriş-çıkışları düzenli yapın</li>
+                <li>Yaşlı ve engellilere yardımcı olun</li>
+            </ul>
+            <footer></footer>
+        </div>
+        <div class="slide">
+            <h1 class="date" style=""><i></i></h1>
+            <div id="clock-container">
+                <div id="clock">
+                    <div class="hand" id="hour" style="--color: #000; --height: 180px; --width: 10px"><i></i></div>
+                    <div class="hand" id="minute" style="--color: #000; --height: 130px; --width: 10px"><i></i></div>
+                    <div class="hand" id="second" style="--color: red; --height: 150px; --width: 3px"><i></i></div>
+                    <span style="--i: 1; --j: 0"><i>|</i></span>
+                    <span style="--i: 2; --j: 0"><i>|</i></span>
+                    <span style="--i: 3; --j: 3"><i>3</i></span>
+                    <span style="--i: 4; --j: 0"><i>|</i></span>
+                    <span style="--i: 5; --j: 0"><i>|</i></span>
+                    <span style="--i: 6; --j: 6"><i>6</i></span>
+                    <span style="--i: 7; --j: 0"><i>|</i></span>
+                    <span style="--i: 8; --j: 0"><i>|</i></span>
+                    <span style="--i: 9; --j: 9"><i>9</i></span>
+                    <span style="--i: 10; --j: 0"><i>|</i></span>
+                    <span style="--i: 11; --j: 0"><i>|</i></span>
+                    <span style="--i: 12; --j: 12"><i>12</i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button onclick="previousSlide()">Previous</button>
+        <button onclick="nextSlide()">Next</button>
+        <button id="autoSlideBtn" onclick="toggleAutoSlide()">Pause</button>
+    </div>
+</div>
+
+<script>
+    const config = {
+        SLIDE_DURATION: 12000,  // 12 seconds
+        PRAYER_REFRESH: 60000 * 60 * 6, // 6 hours
+        SABAH_CORRECTION: -45, // minutes
+        ISHA_CORRECTION: 0, // minutes
+        PRAYER_IMSAK_CORRECTION: 1, // minutes
+        PRAYER_MAGHRIB_CORRECTION: -2, // minutes
+        PRAYER_ISHA_CORRECTION: -8, // minutes
+        isAutoSliding: false
+    };
+
+    let currentSlide = 0;
+    let slides = document.querySelectorAll('.slide');
+    let slideInterval;
+
+    async function loadPrayerTimes(city, country, title, lang) {
+        const slideTemplate = document.getElementById('slide-template').content.cloneNode(true);
+        slideTemplate.querySelector('h2').textContent = `${city} ${title}`;
+
+        const prayerTimesContainer = slideTemplate.querySelector('.prayer-times');
+        prayerTimesContainer.innerHTML = '';
+
+        const loading = slideTemplate.querySelector('.loading');
+        loading.style.display = 'block';
+
+        try {
+            const response = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=13`);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch prayer times');
+            }
+
+            const data = await response.json();
+            const timings = data.data.timings;
+
+            const prayerNamesTR = {'İmsak': 'Fajr', 'Güneş': 'Sunrise', 'Öĝle': 'Dhuhr', 'İkindi': 'Asr', 'Akşam': 'Maghrib', 'Yatsı': 'Isha'};
+            const prayerNamesNL = {'Imsak': 'Fajr', 'Shuruq': 'Sunrise', 'Dhuhr': 'Dhuhr', 'Asr': 'Asr', 'Maghrib': 'Maghrib', 'Isha': 'Isha'};
+            const prayers = lang == 'TR' ? prayerNamesTR : prayerNamesNL;
+            const template = document.getElementById('prayer-time-template');
+            const hijriDate = `${data.data.date.hijri.day} ${data.data.date.hijri.month.en} ${data.data.date.hijri.year}`;
+            const gregDate = new Date().toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+            document.querySelectorAll('.slide footer').forEach(footer => footer.textContent = `${gregDate} / ${hijriDate}`);
+
+            Object.keys(prayers).forEach(prayer => {
+                const clone = template.content.cloneNode(true);
+                clone.querySelector('.prayer-name').textContent = prayer;
+                let time = timings[prayers[prayer]];
+                if (prayer === 'İmsak' || prayer === 'Imsak') {
+                    time = adjustMinutes(timings[prayers[prayer]], config.PRAYER_IMSAK_CORRECTION);
+                } else if (prayer === 'Maghrib' || prayer === 'Akşam') {
+                    time = adjustMinutes(timings[prayers[prayer]], config.PRAYER_MAGHRIB_CORRECTION);
+                } else if (prayer === 'Isha' || prayer === 'Yatsı') {
+                    time = adjustMinutes(timings[prayers[prayer]], config.PRAYER_ISHA_CORRECTION);
+                }
+                clone.querySelector('.prayer-time-value').textContent = time;
+                prayerTimesContainer.appendChild(clone);
+            });
+
+            const sl = document.querySelector('.slideshow-container .slides');
+            sl.insertBefore(slideTemplate, sl.children[0]);
+            slides = document.querySelectorAll('.slide');
+        } catch (error) {
+            console.log('error: ' + error);
+            const errorTemplate = document.getElementById('error-template').content.cloneNode(true);
+            errorTemplate.querySelector('.error-message').textContent = error.message;
+            prayerTimesContainer.innerHTML = '';
+            prayerTimesContainer.appendChild(errorTemplate);
+        } finally {
+            loading.style.display = 'none';
+        }
+    }
+
+    async function showHolidays(lang) {
+        const slideTemplate = document.getElementById('slide-template').content.cloneNode(true);
+        slideTemplate.querySelector('h2').innerHTML = lang === 'NL' ? 'Aankomende feestdagen' : 'Yaklaşan dini günler';
+
+        const holidaysContainer = slideTemplate.querySelector('.holidays');
+        holidaysContainer.innerHTML = '';
+
+        const loading = slideTemplate.querySelector('.loading');
+        loading.style.display = 'block';
+
+        try {
+            const hijriYearResponse = await fetch(`https://api.aladhan.com/v1/currentIslamicYear`);
+            const hijriYear = await hijriYearResponse.json();
+            const response = await fetch(`https://api.aladhan.com/v1/islamicHolidaysByHijriYear/${hijriYear.data}`);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch holidays');
+            }
+
+            const data = await response.json();
+            const holidays = data.data
+                .filter(item => isCurrentOrNextMonth(item.gregorian.date))
+                .filter(item => Array.isArray(item.hijri.holidays) && item.hijri.holidays.length > 0)
+                .map(item => {
+                    return {
+                        dateHijri: `${item.hijri.day} ${item.hijri.month.en} ${item.hijri.year}`,
+                        date: item.gregorian.date,
+                        name: item.hijri.holidays.map(name => translate(name, lang))
+                    }
+                });
+
+            holidays
+                .filter(holiday => !/(21|23|25|29) Ramaḍān/i.test(holiday.dateHijri))
+                .forEach((holiday, index) => {
+                    holiday.name = holiday.name.filter(name => {
+                      return !/(Urs|Abu|Birth)/i.test(name);
+                    });
+
+                    if (holiday.dateHijri.startsWith('27 Ramaḍān')) {
+                        holiday.date = adjustDate(holiday.date, -1);
+                    }
+
+                    if (holiday.name.length === 0) {
+                        holidays.splice(index, 1);
+                    } else {
+                        const clone = document.getElementById('holidays-item-template').content.cloneNode(true);
+                        clone.querySelector('.li-key').textContent = holiday.date;
+                        clone.querySelector('.li-value').textContent = `${holiday.name.join(',')} (${holiday.dateHijri})`;
+                        if (isToday(holiday.date)) {
+                            clone.querySelector('li').classList.add('current');
+                        }
+
+                        holidaysContainer.appendChild(clone);
+                    }
+                });
+
+            if (Array.isArray(holidays) && holidays.length > 0) {
+                const sl = document.querySelector('.slideshow-container .slides');
+                sl.insertBefore(slideTemplate, sl.children[0]);
+                slides = document.querySelectorAll('.slide');
+            }
+            return holidays;
+        } catch (error) {
+            console.log('error: ' + error);
+            const errorTemplate = document.getElementById('error-template').content.cloneNode(true);
+            errorTemplate.querySelector('.error-message').textContent = error.message;
+            holidaysContainer.innerHTML = '';
+            holidaysContainer.appendChild(errorTemplate);
+        } finally {
+            loading.style.display = 'none';
+        }
+    }
+
+    function showSabahAndIshaTimes(lang, timings) {
+        var dynamicPrayer = ['Sunrise', 'Isha'];
+        const slideTemplate = document.getElementById('slide-template').content.cloneNode(true);
+        slideTemplate.querySelector('h2').textContent = lang == 'TR' ? 'Camide sabah & yatsı namaz saatleri' : 'Ochtend & Nacht gebedstijden in de moskee';
+
+        dynamicPrayer.forEach(p => {
+            const clone = document.getElementById('holidays-item-template').content.cloneNode(true);
+            clone.querySelector('.li-key').textContent = lang == 'TR' ? (p == 'Sunrise' ? 'sabah' : 'yatsı') : (p == 'Sunrise' ? 'ochtendgebed' : 'nachtgebed');
+            clone.querySelector('.li-value').textContent = adjustMinutes(timings[p], p == 'Sunrise' ? config.SABAH_CORRECTION : config.ISHA_CORRECTION);
+            slideTemplate.querySelector('ul').appendChild(clone);
+        });
+
+        slideTemplate.querySelector('.loading').style.display = 'none';
+        const sl = document.querySelector('.slideshow-container .slides');
+        sl.insertBefore(slideTemplate, sl.children[0]);
+    }
+
+    function adjustMinutes(timeString, min) {
+          let [hours, minutes] = timeString.split(':').map(Number);
+
+          let time = new Date();
+          time.setHours(hours);
+          time.setMinutes(minutes);
+          time.setSeconds(0); // Reset seconds to 0 (optional)
+
+          time.setMinutes(time.getMinutes() + min);
+
+          let updatedHours = time.getHours();
+          let updatedMinutes = time.getMinutes();
+
+          return `${updatedHours.toString().padStart(2, '0')}:${updatedMinutes.toString().padStart(2, '0')}`;
+    }
+
+    function adjustDate(dateString, min) {
+          let [date, month, year] = dateString.split('-').map(Number);
+
+          let time = new Date();
+          time.setDate(date + min);
+          time.setMonth(month - 1);
+          time.setYear(year);
+          return time.toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+    }
+
+    function isToday(dateStr) {
+        const today = new Date();
+        const [day, month, year] = dateStr.split('-');
+        const inputDate = new Date(year, month - 1, day);
+
+        return today.getMonth() == inputDate.getMonth() && today.getDate() == inputDate.getDate();
+    }
+
+    function isCurrentOrNextMonth(dateStr) {
+        const today = new Date();
+        const nextMonth = new Date(today);
+        nextMonth.setMonth(today.getMonth() + 1);
+        nextMonth.setDate(31);
+
+        const [day, month, year] = dateStr.split('-');
+        const inputDate = new Date(year, month - 1, day);
+
+        return inputDate >= today && inputDate <= nextMonth;
+    }
+
+    function translate(name, lang) {
+        const holidaysNL = {
+            '1st Day of Ramadan': 'Begin Ramadan',
+            'beginning of the holy months': 'Begin van de heilige maanden',
+            'hajj': 'Hadj',
+            'arafa': 'Arafa'
+        };
+
+        const holidaysTR = {
+            'lailat-ul-miraj': 'Miraç kandili',
+            'beginning of the holy months': '3 ayların başlangıcı',
+            '1st Day of Ramadan': 'Ramazan',
+            'Eid-ul-Fitr': 'Ramazan bayramı',
+            'Lailat-ul-Qadr': 'Kadir gecesi',
+            'Lailat-ul-Bara\'at': 'Berat gecesi',
+            'hajj': 'Haç',
+            'arafa': 'Arife',
+            'eid-ul-adha': 'Kurban Bayramı'
+        };
+
+        let key;
+        let translation;
+        if (lang === 'NL') {
+            key = Object.keys(holidaysNL).find(objKey => objKey.toLowerCase() === name.toLowerCase());
+            translation = holidaysNL[key];
+        } else {
+            key = Object.keys(holidaysTR).find(objKey => objKey.toLowerCase() === name.toLowerCase());
+            translation = holidaysTR[key];
+        }
+
+        return translation !== undefined ? translation : name;
+    }
+
+    function updateClock() {
+        const date = new Date();
+        const options = { timeZone: "Europe/Amsterdam", hour12: true };
+        const hour = parseInt(new Intl.DateTimeFormat("nl-NL", { ...options, hour: "2-digit" }).format(date));
+        const minute = parseInt(new Intl.DateTimeFormat("nl-NL", { ...options, minute: "2-digit" }).format(date));
+        const second = parseInt(new Intl.DateTimeFormat("nl-NL", { ...options, second: "2-digit" }).format(date));
+
+        const formattedDate = date.toLocaleDateString("tr-TR", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        });
+        const finalDate = formattedDate.replace(/\b(\w)/g, (char) => char.toUpperCase());
+
+        document.getElementById('hour').style.transform = `rotate(${30 * hour + (minute / 2)}deg)`;
+        document.getElementById('minute').style.transform = `rotate(${6 * minute}deg)`;
+        document.getElementById('second').style.transform = `rotate(${6 * second}deg)`;
+        document.querySelector('.date i').innerText = `${finalDate}`;
+    }
+
+    function showSlide(n) {
+        slides.forEach(slide => slide.classList.remove('active'));
+        currentSlide = (n + slides.length) % slides.length;
+        slides[currentSlide].classList.add('active');
+    }
+
+    function nextSlide() {
+        showSlide(currentSlide + 1);
+    }
+
+    function previousSlide() {
+        showSlide(currentSlide - 1);
+        if (config.isAutoSliding) {
+            resetAutoSlide();
+        }
+    }
+
+    function startAutoSlide() {
+        if (slideInterval) clearInterval(slideInterval);
+        slideInterval = setInterval(nextSlide, config.SLIDE_DURATION);
+        setInterval(prayerCities, config.PRAYER_REFRESH);
+    }
+
+    function resetAutoSlide() {
+        if (slideInterval) clearInterval(slideInterval);
+        if (config.isAutoSliding) {
+            startAutoSlide();
+        }
+    }
+
+    function toggleAutoSlide() {
+        const autoSlideBtn = document.getElementById('autoSlideBtn');
+        config.isAutoSliding = !config.isAutoSliding;
+
+        if (config.isAutoSliding) {
+            startAutoSlide();
+            autoSlideBtn.textContent = 'Pause';
+        } else {
+            clearInterval(slideInterval);
+            autoSlideBtn.textContent = 'Resume';
+        }
+    }
+
+    function prayerCities() {
+        loadPrayerTimes('Rotterdam', 'Netherlands', 'Namaz Vakitleri', 'TR');
+        loadPrayerTimes('Rotterdam', 'Netherlands', 'Gebedstijden', 'NL');
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+    prayerCities();
+    showHolidays('NL');
+    showHolidays('TR');
+    startAutoSlide();
+</script>
+</body>
+</html>
+
