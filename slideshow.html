@@ -408,8 +408,8 @@
             <h1 class="date" style=""><i></i></h1>
             <div id="clock-container">
                 <div id="clock">
-                    <div class="hand" id="hour" style="--color: #000; --height: 180px; --width: 10px"><i></i></div>
-                    <div class="hand" id="minute" style="--color: #000; --height: 130px; --width: 10px"><i></i></div>
+                    <div class="hand" id="hour" style="--color: #000; --height: 130px; --width: 10px"><i></i></div>
+                    <div class="hand" id="minute" style="--color: #000; --height: 180px; --width: 10px"><i></i></div>
                     <div class="hand" id="second" style="--color: red; --height: 150px; --width: 3px"><i></i></div>
                     <span style="--i: 1; --j: 0"><i>|</i></span>
                     <span style="--i: 2; --j: 0"><i>|</i></span>
@@ -746,7 +746,6 @@
     }
 
     setInterval(updateClock, 1000);
-    updateClock();
     prayerCities();
     showHolidays('NL');
     showHolidays('TR');
