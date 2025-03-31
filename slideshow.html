@@ -63,6 +63,7 @@
             text-transform: capitalize;
             color: darkblue;
             margin-bottom: 30px;
+            align-content: center;
         }
 
         .slide footer {
@@ -73,29 +74,33 @@
             font-style: italic;
         }
 
-        .prayer-name {
-            color: gray;
-            font-size: 2rem;
-        }
-
         .prayer-times {
             display: flex;
             flex-wrap: wrap;
-            gap: 2.0rem;
+            margin-right: 2.0rem;
             justify-content: center;
         }
 
         .prayer-time {
             flex: 0 0 20%;
             background: #f8f8f8;
-            padding: 1rem 1rem;
+            padding: 0.5rem 0.5rem;
             border-radius: 20%;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-align: left;
+            margin: 0 20px 20px 0;
+        }
+
+        .prayer-time-value, .prayer-name {
+            font-size: 1.5rem;
+            margin-left: 20px;
+        }
+
+        .prayer-name {
+            color: gray;
         }
 
         .prayer-time-value {
-            font-size: 3rem;
             margin-top: 20px;
         }
 
@@ -116,11 +121,11 @@
         }
 
         .custom ul, .holidays, .custom h3  {
-            font-size: 1.5vw;
+            font-size: 1.5rem;
         }
 
         .holidays li, .custom ul li {
-            margin-bottom: 1.5vw;
+            margin-bottom: 1vw;
         }
 
         .custom ul li {
@@ -219,63 +224,6 @@
             .prayer-time {
                 padding: 0.5rem;
             }
-        }
-
-        #clock-container {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: sans-serif;
-        }
-        #clock {
-            width: 500px;
-            height: 500px;
-            border: 25px solid #000;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #FFF;
-        }
-        #clock span {
-            position: absolute;
-            transform: rotate(calc(30deg * var(--i)));
-            inset: 32px;
-            text-align: center;
-        }
-        #clock span i {
-            transform: rotate(calc(-30deg * var(--j)));
-            display: inline-block;
-            font-size: 3.2rem;
-            font-style: normal;
-        }
-        #clock::after {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #000;
-            z-index: 2;
-            opacity: 0.6;
-        }
-        #clock .hand {
-            position: absolute;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-        }
-        #clock .hand i {
-            position: absolute;
-            background-color: var(--color);
-            width: var(--width);
-            height: var(--height);
-            border-radius: 8px;
-        }
-
-        .date i {
-            color: lightslategray;
         }
     </style>
 </head>
@@ -403,28 +351,6 @@
                 <li>Yaşlı ve engellilere yardımcı olun</li>
             </ul>
             <footer></footer>
-        </div>
-        <div class="slide">
-            <h1 class="date" style=""><i></i></h1>
-            <div id="clock-container">
-                <div id="clock">
-                    <div class="hand" id="hour" style="--color: #000; --height: 130px; --width: 10px"><i></i></div>
-                    <div class="hand" id="minute" style="--color: #000; --height: 180px; --width: 10px"><i></i></div>
-                    <div class="hand" id="second" style="--color: red; --height: 150px; --width: 3px"><i></i></div>
-                    <span style="--i: 1; --j: 0"><i>|</i></span>
-                    <span style="--i: 2; --j: 0"><i>|</i></span>
-                    <span style="--i: 3; --j: 3"><i>3</i></span>
-                    <span style="--i: 4; --j: 0"><i>|</i></span>
-                    <span style="--i: 5; --j: 0"><i>|</i></span>
-                    <span style="--i: 6; --j: 6"><i>6</i></span>
-                    <span style="--i: 7; --j: 0"><i>|</i></span>
-                    <span style="--i: 8; --j: 0"><i>|</i></span>
-                    <span style="--i: 9; --j: 9"><i>9</i></span>
-                    <span style="--i: 10; --j: 0"><i>|</i></span>
-                    <span style="--i: 11; --j: 0"><i>|</i></span>
-                    <span style="--i: 12; --j: 12"><i>12</i></span>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -677,26 +603,6 @@
         return translation !== undefined ? translation : name;
     }
 
-    function updateClock() {
-        const date = new Date();
-        const options = { timeZone: "Europe/Amsterdam", hour12: true };
-        const hour = parseInt(new Intl.DateTimeFormat("nl-NL", { ...options, hour: "2-digit" }).format(date));
-        const minute = parseInt(new Intl.DateTimeFormat("nl-NL", { ...options, minute: "2-digit" }).format(date));
-        const second = parseInt(new Intl.DateTimeFormat("nl-NL", { ...options, second: "2-digit" }).format(date));
-
-        const formattedDate = date.toLocaleDateString("tr-TR", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        });
-        const finalDate = formattedDate.replace(/\b(\w)/g, (char) => char.toUpperCase());
-
-        document.getElementById('hour').style.transform = `rotate(${30 * hour + (minute / 2)}deg)`;
-        document.getElementById('minute').style.transform = `rotate(${6 * minute}deg)`;
-        document.getElementById('second').style.transform = `rotate(${6 * second}deg)`;
-        document.querySelector('.date i').innerText = `${finalDate}`;
-    }
-
     function showSlide(n) {
         slides.forEach(slide => slide.classList.remove('active'));
         currentSlide = (n + slides.length) % slides.length;
@@ -715,6 +621,9 @@
     }
 
     function startAutoSlide() {
+        showHolidays('NL');
+        showHolidays('TR');
+
         if (slideInterval) clearInterval(slideInterval);
         slideInterval = setInterval(nextSlide, config.SLIDE_DURATION);
         setInterval(prayerCities, config.PRAYER_REFRESH);
@@ -745,10 +654,7 @@
         loadPrayerTimes('Rotterdam', 'Netherlands', 'Gebedstijden', 'NL');
     }
 
-    setInterval(updateClock, 1000);
     prayerCities();
-    showHolidays('NL');
-    showHolidays('TR');
     startAutoSlide();
 </script>
 </body>
